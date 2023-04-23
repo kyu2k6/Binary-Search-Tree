@@ -33,6 +33,8 @@ void showTrunks(Trunk* p) { //Uesd for printing
 void createArray(char* in, int* array, int& count);
 void add(Node*& head, Node*& current, Node*& prev, int data);
 void print(Node* head, Trunk *previous, bool prev);
+void search(Node* current, int &data);
+Node* del(Node* &head, int data);
 
 int main() {
 
@@ -77,6 +79,24 @@ int main() {
 		//file input
 		else if (strcmp(option, "File") == 0) {
 			tree = true;
+			cout << "File name: ";
+			cin.get(filename, 20);
+			cin.get();
+			streampos size;
+			ifstream file(filename, ios::in | ios::binary | ios::ate);
+			if (file.is_open()) {
+				size = file.tellg();
+				file.seekg(0, ios::beg);
+				file.read(input, size);
+                    		file.close();
+				createArray(input, array, count);
+				for (int i = 0; i < 100; i++) {
+					if(array[i] != 0) {
+						cout << array[i] << " ";
+						modesize++;
+					}
+				}
+			}
 		}
 		//wrong input
 		else {
@@ -96,12 +116,115 @@ int main() {
 				}
 			}
 			print(head, NULL, false);
+			bool part2 = true;
+			char options2[10];
+			int searchInput;
+			while (part2 = true) {
+				cout << "Search, Add, Delete, or Quit: ";
+				cin.get(options2, 10);
+				cin.get();
+				if (strcmp(options2, "Search") == 0) {
+					cout << "What num? ";
+					cin >> searchInput;
+					cin.get();
+					search(head, searchInput);
+				}	
+				else if (strcmp(options2, "Add") == 0) {
+					int value;
+					cout << "Add Value: ";
+					cin >> value;
+					cin.get();
+					Node* current = NULL;
+					Node* previous = NULL;
+					current = head;
+					add(head, current, previous, value);
+					print(head, NULL, false);
+					cout << endl;
+				}
+				else if (strcmp(options2, "Delete") == 0) {
+					int delvalue;
+					cout << "What value to delete? ";
+					cin >> delvalue;
+					cin.get();
+					head = del(head, delvalue);
+					print(head, NULL, false);
+				}
+				else {
+					cout << "Not an option." << endl;
+				}
+			}
 		}
-
-	
 	}
 	return 0;
 }
+
+Node* del(Node* &head, int data) {
+	Node* prev = head -> getPrev();
+	Node* next = head -> getNext();
+	if (head == NULL) {
+		return head;
+	}
+	else if (data < head -> getData()) {
+		head -> setPrev(del(prev, data));
+	}
+	else if (data > head -> getData()) {
+		head -> setNext(del(next, data));
+	}
+	else {
+		if (head -> getNext() == NULL && head -> getPrev() == NULL) {
+			head -> ~Node();
+			head = NULL;
+			return head;
+		}
+		else if (head -> getPrev() == NULL) {
+			Node* temp = head;
+			head = head -> getNext();
+			temp -> ~Node();
+			return head;
+		}
+		else if (head -> getNext() == NULL) {
+			Node* temp = head;
+			head = head -> getPrev();
+			temp -> ~Node();
+			return head;
+		}
+		else {
+			Node* temp = head -> getNext();
+			while (temp -> getPrev() != NULL) {
+				temp = temp -> getPrev();
+			}
+			head -> setData(temp -> getData());
+			Node* h = head -> getNext();
+			head -> setNext(del(h, temp->getData()));
+		}
+	}
+	return head;
+}
+
+void search(Node* current, int& data) { 
+	while (current -> getData() != data && current != NULL) {
+		if(current != NULL) {
+			if(current -> getData() > data) {
+				current = current -> getPrev();
+			}
+			else {
+				current = current -> getNext();
+			}
+		}
+		if (current == NULL) {
+			break;
+		}
+	}
+	if (current != NULL) {
+		if(current -> getData() == data) {
+			cout << "In the Tree." << endl;
+		}
+	}
+	else {
+		cout << "Not in the Tree." << endl;
+	}
+}
+
 
 void print(Node* head, Trunk *previous, bool prev) {
 	
