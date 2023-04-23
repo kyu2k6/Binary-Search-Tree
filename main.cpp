@@ -1,3 +1,7 @@
+//Kevin Yu
+//4-6-23
+//Binary Search Tree with add print search and delete
+
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -5,8 +9,30 @@
 
 using namespace std;
 
+//trunk function from nathan zou to help print the tree
+
+struct Trunk { //Used for printing
+    Trunk *previous;
+    char* str;
+
+    Trunk(Trunk* previous, char* str) {
+        this->previous = previous;
+        this->str = str;
+    }
+};
+
+void showTrunks(Trunk* p) { //Uesd for printing
+    if (p == NULL) 
+        return;
+
+    showTrunks(p->previous);
+
+    cout << p->str;
+}
+
 void createArray(char* in, int* array, int& count);
-void add(Node*& head, Node*& current, Node*& prev, array[i]);
+void add(Node*& head, Node*& current, Node*& prev, int data);
+void print(Node* head, Trunk *previous, bool prev);
 
 int main() {
 
@@ -44,7 +70,6 @@ int main() {
 			createArray(in, array, count);
 			for (int i = 0; i < 100; i++) {
 				if (array[i] != 0) {
-					cout << array[i] << " " << endl;
 					modesize++;
 				}
 			}
@@ -70,13 +95,45 @@ int main() {
 					add(head, current, previous, array[i]);
 				}
 			}
-
+			print(head, NULL, false);
 		}
 
 	
 	}
 	return 0;
 }
+
+void print(Node* head, Trunk *previous, bool prev) {
+	
+	if (head == NULL) {
+		return;
+	}
+
+	char* prevStr = (char*)("    ");
+	Trunk *trunk = new Trunk(previous, prevStr);
+	print(head -> getPrev(), trunk, true);
+
+	if (!previous) {
+		trunk -> str = (char*)("---");
+	}
+	else if (prev) {
+		trunk -> str = (char*)(".---");
+		prevStr = (char*)("   |");
+	}
+	else {
+		trunk -> str = (char*)("'---");
+		previous -> str = prevStr;
+	}
+	showTrunks(trunk);
+	cout << " " << head->getData() << endl;
+
+	if (previous) {
+		previous -> str = prevStr;
+	}
+	trunk->str = (char*)("   |");
+	print(head -> getNext(), trunk, false);
+}
+
 
 void add(Node*& head, Node*& current, Node*& previous, int data) {
 	//first
@@ -85,7 +142,41 @@ void add(Node*& head, Node*& current, Node*& previous, int data) {
 		head -> setData(data);
 		return;
 	}
+	else {
+		//if smaller
+		if (data < current -> getData()) {
+			previous = current;
+			current = current -> getPrev();
+			//if nothing here just insert it in tree
+			if (current == NULL) {
+				current = new Node();
+				current -> setData(data);
+				previous -> setPrev(current);
+				return;
+			}
+			else {
+				//repeat
+				add(head, current, previous, data);
+			}
+		}
+		//if bigger
+		else {
+			previous = current;
+			current = current -> getNext();
+			if (current == NULL) {
+				current = new Node();
+				current -> setData(data);
+				previous -> setNext(current);
+				return;
+			}
+			else {
+				add(head, current, previous, data);
+			}
+		}
+	}
 }
+
+
 
 void createArray(char* in, int* array, int& count) {
 	int x = 0; // counter of char before add
